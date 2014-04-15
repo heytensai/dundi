@@ -9,7 +9,6 @@ use IO::Socket::INET;
 use Data::Dumper;
 use Dundi;
 
-# TODO use pcap instead
 my $sock = IO::Socket::INET->new(LocalPort => 4521, Proto => 'udp', ReuseAddr => 1);
 
 my $dundi = Dundi->new();
