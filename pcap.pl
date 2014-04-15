@@ -56,6 +56,10 @@ sub process_packet
 	$buffer = pack('H*', $bits);
 
 	my $packet = $dundi->parse($buffer);
-	print Dumper($packet);
+	print "DUNDi $packet->{cmd}\n";
+	print " ($packet->{src}, $packet->{dst}) seq ($packet->{iseq}, $packet->{oseq})\n";
+	print " (f=$packet->{f}, r=$packet->{r} flags=$packet->{flags})\n";
+	print " IE (", ($#{$packet->{ie}} + 1), ")\n";
+	print "\n";
 }
 
