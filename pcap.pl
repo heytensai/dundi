@@ -59,7 +59,14 @@ sub process_packet
 	print "DUNDi $packet->{cmd}\n";
 	print " ($packet->{src}, $packet->{dst}) seq ($packet->{iseq}, $packet->{oseq})\n";
 	print " (f=$packet->{f}, r=$packet->{r} flags=$packet->{flags})\n";
-	print " IE (", ($#{$packet->{ie}} + 1), ")\n";
+	print " Information Elements (", ($#{$packet->{ie}} + 1), ")\n";
+	foreach my $ie (@{$packet->{ie}}){
+		print "  " . $ie->{type} . "\n";
+		foreach my $key (sort keys %{$ie}){
+			next if ($key eq 'type');
+			print "   $key=$ie->{$key}\n";
+		}
+	}
 	print "\n";
 }
 
