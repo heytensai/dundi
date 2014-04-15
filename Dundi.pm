@@ -128,7 +128,7 @@ sub parse
 	my $buffer = shift;
 	my $packet = {};
 
-	my ($src_tnx, $dst_tnx, $iseq, $oseq, $fld, $flags, $ie) = unpack('nnCCCCC*', $buffer);
+	my ($src_tnx, $dst_tnx, $iseq, $oseq, $fld, $flags, $ie) = unpack('nnCCCCH*', $buffer);
 	my $f = ($fld & 0x80) >> 7;
 	my $r = ($fld & 0x40) >> 7;
 	my $cmd = ($fld & 0x3f);
@@ -143,6 +143,9 @@ sub parse
 		$packet->{f} = $f;
 		$packet->{r} = $r;
 		$packet->{flags} = $flags;
+
+		# convert IE back
+		$ie = pack('H*', $ie);
 
 		$packet->{ie} = $self->parse_ie($cmd, $ie);
 	}
