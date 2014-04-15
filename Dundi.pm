@@ -147,7 +147,7 @@ sub parse
 		# convert IE back
 		$ie = pack('H*', $ie);
 
-		$packet->{ie} = $self->parse_ie($cmd, $ie);
+		$packet->{ie} = $self->parse_ie($cmd, $ie, $ie);
 	}
 	else{
 		# invalid packet
@@ -165,78 +165,133 @@ sub parse_ie
 
 	return $response if (!$buffer);
 
-	my ($ie, $len, $data) = unpack('CCC*', $buffer);
+	my ($ie, $len);
+	my $count = 10;
+	while ($buffer && $count--){
+		($ie, $len, $buffer) = unpack('CCH*', $buffer);
+		$buffer = pack('H*', $buffer);
 
-	# TODO add a loop
+		# if it's a valid element type
+		if (defined $IE_NAME{$ie}){
+			my $element = {
+				type => $IE_NAME{$ie},
+			};
 
-	# if it's a valid element type
-	if (defined $IE{$ie}){
-		my $element = {
-			type => $IE{$ie},
-		};
-
-		# IE specific details
-		if ($ie eq $IE{'EID'}){
-			if ($len ne 0x06){
-				print " invalid\n";
-			}
-			else{
-				my $id = unpack('H*', $data);
+			# IE specific details
+			if ($ie eq $IE{'EID'}){
+				my ($id, $buffer) = unpack('H6H*', $buffer);
+				$buffer = pack('H*', $buffer);
 				$element->{id} = $id;
 			}
-		}
-		elsif ($ie eq $IE{'CALLEDCONTEXT'}){
-			my $context = unpack('H*', $data);
-			$element->{context} = $context;
-		}
-		elsif ($ie eq $IE{'CALLEDNUMBER'}){
-			my $number = unpack('H*', $data);
-			$element->{number} = $number;
-		}
-		elsif ($ie eq $IE{'EIDDIRECT'}){
-		}
-		elsif ($ie eq $IE{'ANSWER'}){
-		}
-		elsif ($ie eq $IE{'TTL'}){
-		}
-		elsif ($ie eq $IE{'VERSION'}){
-		}
-		elsif ($ie eq $IE{'EXPIRATION'}){
-		}
-		elsif ($ie eq $IE{'UNKNOWN'}){
-		}
-		elsif ($ie eq $IE{'CAUSE'}){
-		}
-		elsif ($ie eq $IE{'REQEID'}){
-		}
-		elsif ($ie eq $IE{'ENCDATA'}){
-		}
-		elsif ($ie eq $IE{'SHAREDKEY'}){
-		}
-		elsif ($ie eq $IE{'SIGNATURE'}){
-		}
-		elsif ($ie eq $IE{'KEYCRC32'}){
-		}
-		elsif ($ie eq $IE{'HINT'}){
-		}
-		elsif ($ie eq $IE{'DEPARTMENT'}){
-		}
-		elsif ($ie eq $IE{'ORGANIZATION'}){
-		}
-		elsif ($ie eq $IE{'LOCALITY'}){
-		}
-		elsif ($ie eq $IE{'STATEPROV'}){
-		}
-		elsif ($ie eq $IE{'COUNTRY'}){
-		}
-		elsif ($ie eq $IE{'EMAIL'}){
-		}
-		elsif ($ie eq $IE{'PHONE'}){
-		}
-		elsif ($ie eq $IE{'IPADDR'}){
-		}
+			elsif ($ie eq $IE{'CALLEDCONTEXT'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'CALLEDNUMBER'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'EIDDIRECT'}){
+				my ($id, $buffer) = unpack('H6H*', $buffer);
+				$buffer = pack('H*', $buffer);
+				$element->{id} = $id;
+			}
+			elsif ($ie eq $IE{'ANSWER'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'TTL'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'VERSION'}){
+				my ($version, $buffer) = unpack('C2H*', $buffer);
+				$buffer = pack('H*', $buffer);
+				$element->{version} = $version;
+			}
+			elsif ($ie eq $IE{'EXPIRATION'}){
+				my ($expiration, $buffer) = unpack('C2H*', $buffer);
+				$buffer = pack('H*', $buffer);
+				$element->{expiration} = $expiration;
+			}
+			elsif ($ie eq $IE{'UNKNOWN'}){
+				my ($unknown, $buffer) = unpack('C2H*', $buffer);
+				$buffer = pack('H*', $buffer);
+				$element->{unknown} = $unknown;
+			}
+			elsif ($ie eq $IE{'CAUSE'}){
+				# TODO H* is not the correct unpack code
+				my ($code, $desc) = unpack('CH*', $buffer);
+				$desc = pack('H*', $desc);
+				$element->{code} = $code;
+				$element->{description} = $desc;
+			}
+			elsif ($ie eq $IE{'REQEID'}){
+				my ($id, $buffer) = unpack('H6H*', $buffer);
+				$buffer = pack('H*', $buffer);
+				$element->{id} = $id;
+			}
+			elsif ($ie eq $IE{'ENCDATA'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'SHAREDKEY'}){
+				my $key = unpack('H*', $buffer);
+				$buffer = '';
+				$element->{key} = $key;
+			}
+			elsif ($ie eq $IE{'SIGNATURE'}){
+				my $sig = unpack('H*', $buffer);
+				$buffer = '';
+				$element->{signature} = $sig;
+			}
+			elsif ($ie eq $IE{'KEYCRC32'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'HINT'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'DEPARTMENT'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'ORGANIZATION'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'LOCALITY'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'STATEPROV'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'COUNTRY'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'EMAIL'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'PHONE'}){
+				# TODO
+				$buffer = '';
+			}
+			elsif ($ie eq $IE{'IPADDR'}){
+				# TODO
+				$buffer = '';
+			}
 
-		push @{$response}, $element;
+			push @{$response}, $element;
+		}
+		else{
+			print "unknown IE\n";
+			$buffer = '';
+		}
 	}
 
 	return $response;
