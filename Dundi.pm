@@ -1,3 +1,9 @@
+# Dundi.pm
+#
+# Copyright (c) 2014 Corey Edwards <tensai@zmonkey.org>. All rights reserved.
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+
 package Dundi;
 
 use strict;
