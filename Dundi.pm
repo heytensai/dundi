@@ -159,7 +159,7 @@ sub parse
 		$packet->{flags} = $flags;
 
 		# convert IE back
-		$ie = pack('H*', $ie);
+		$ie = $ie ? pack('H*', $ie) : '';
 
 		$packet->{ie} = $self->parse_ie($cmd, $ie, $ie);
 	}
