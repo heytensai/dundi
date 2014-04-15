@@ -15,12 +15,16 @@ my %options = (
 	promisc => 0,
 	snaplen => 1500,
 	bpf => 'udp and port 4520',
+	strip => 88,
+	bits => undef,
 );
 GetOptions(
 	'dev=s' => \$options{dev},
 	'promisc' => \$options{promisc},
 	'snaplen=i' => \$options{snaplen},
 	'bpf=s' => \$options{bpf},
+	'strip=i' => \$options{strip},
+	'bits' => \$options{bits},
 );
 
 my $dundi = Dundi->new();
@@ -45,7 +49,10 @@ sub process_packet
 	# naive way to strip off the IP/TCP headers.
 	# this is probably highly prone to breakage.
 	my $bits = unpack('H*', $buffer);
-	$bits =~ s/^.{88}//;
+	if ($options{bits}){
+		print "$bits\n";
+	}
+	$bits =~ s/^.{$options{strip}}//;
 	$buffer = pack('H*', $bits);
 
 	my $packet = $dundi->parse($buffer);
