@@ -27,6 +27,10 @@ GetOptions(
 	'bits' => \$options{bits},
 );
 
+if (!$options{dev}){
+	die "E: need a device";
+}
+
 my $dundi = Dundi->new();
 
 my $err;
