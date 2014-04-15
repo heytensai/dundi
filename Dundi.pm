@@ -28,6 +28,20 @@ C<Dundi> is cool
 
 =cut
 
+my %PROTOCOL = (
+	'NONE' => 0x00,
+	'IAX' => 0x01,
+	'SIP' => 0x02,
+	'H.323' => 0x03,
+);
+
+my %PROTOCOL_NAME = (
+	$PROTOCOL{'NONE'} => 'NONE',
+	$PROTOCOL{'IAX'} => 'IAX',
+	$PROTOCOL{'SIP'} => 'SIP',
+	$PROTOCOL{'H.323'} => 'H.323',
+);
+
 my %CMD = (
 	'ACK' => 0x00,
 	'DPDISCOVER' => 0x01,
@@ -184,12 +198,14 @@ sub parse_ie
 				$element->{id} = $id;
 			}
 			elsif ($ie eq $IE{'CALLEDCONTEXT'}){
-				# TODO
-				$buffer = '';
+				my $context = substr($buffer, 0, $len);
+				$buffer = substr($buffer, $len-1);
+				$element->{context} = $context;
 			}
 			elsif ($ie eq $IE{'CALLEDNUMBER'}){
-				# TODO
-				$buffer = '';
+				my $number = substr($buffer, 0, $len);
+				$buffer = substr($buffer, $len-1);
+				$element->{number} = $number;
 			}
 			elsif ($ie eq $IE{'EIDDIRECT'}){
 				my ($id, $buffer) = unpack('H6H*', $buffer);
@@ -197,12 +213,37 @@ sub parse_ie
 				$element->{id} = $id;
 			}
 			elsif ($ie eq $IE{'ANSWER'}){
-				# TODO
-				$buffer = '';
+				# destination-specific data is 11 bytes past the beginning
+				my $datalen = $len - 11;
+				$datalen = 0 if ($datalen < 0);
+
+				my ($eid, $protocol, $bits, $weight, $data, $buffer) = unpack('H6CC2C2H'.$datalen.'H*', $buffer);
+				$buffer = pack('H*', $buffer);
+				$element->{eid} = $eid;
+				if (defined $PROTOCOL_NAME{$protocol}){
+					$element->{protocol} = $PROTOCOL_NAME{$protocol};
+				}
+				else{
+					$element->{protocol} = $protocol;
+				}
+				$element->{weight} = $weight;
+				$element->{destination} = $data;
+
+				$element->{exists} = 1 if ($bits & (1 << 0));
+				$element->{matchmore} = 1 if ($bits & (1 << 1));
+				$element->{canmatch} = 1 if ($bits & (1 << 2));
+				# following are reserved, but we'll include them just for fun
+				$element->{ignorepat} = 1 if ($bits & (1 << 3));
+				$element->{residential} = 1 if ($bits & (1 << 4));
+				$element->{commercial} = 1 if ($bits & (1 << 5));
+				$element->{mobile} = 1 if ($bits & (1 << 6));
+				$element->{nounsolicited} = 1 if ($bits & (1 << 7));
+				$element->{nocommercial} = 1 if ($bits & (1 << 8));
 			}
 			elsif ($ie eq $IE{'TTL'}){
-				# TODO
-				$buffer = '';
+				my ($ttl, $buffer) = unpack('C2H*', $buffer);
+				$buffer = pack('H*', $buffer);
+				$element->{ttl} = $ttl;
 			}
 			elsif ($ie eq $IE{'VERSION'}){
 				my ($version, $buffer) = unpack('C2H*', $buffer);
@@ -254,36 +295,44 @@ sub parse_ie
 				$buffer = '';
 			}
 			elsif ($ie eq $IE{'DEPARTMENT'}){
-				# TODO
-				$buffer = '';
+				my $department = substr($buffer, 0, $len);
+				$buffer = substr($buffer, $len-1);
+				$element->{department} = $department;
 			}
 			elsif ($ie eq $IE{'ORGANIZATION'}){
-				# TODO
-				$buffer = '';
+				my $organization = substr($buffer, 0, $len);
+				$buffer = substr($buffer, $len-1);
+				$element->{organization} = $organization;
 			}
 			elsif ($ie eq $IE{'LOCALITY'}){
-				# TODO
-				$buffer = '';
+				my $locality = substr($buffer, 0, $len);
+				$buffer = substr($buffer, $len-1);
+				$element->{locality} = $locality;
 			}
 			elsif ($ie eq $IE{'STATEPROV'}){
-				# TODO
-				$buffer = '';
+				my $stateprov = substr($buffer, 0, $len);
+				$buffer = substr($buffer, $len-1);
+				$element->{stateprov} = $stateprov;
 			}
 			elsif ($ie eq $IE{'COUNTRY'}){
-				# TODO
-				$buffer = '';
+				my $country = substr($buffer, 0, $len);
+				$buffer = substr($buffer, $len-1);
+				$element->{country} = $country;
 			}
 			elsif ($ie eq $IE{'EMAIL'}){
-				# TODO
-				$buffer = '';
+				my $email = substr($buffer, 0, $len);
+				$buffer = substr($buffer, $len-1);
+				$element->{email} = $email;
 			}
 			elsif ($ie eq $IE{'PHONE'}){
-				# TODO
-				$buffer = '';
+				my $phone = substr($buffer, 0, $len);
+				$buffer = substr($buffer, $len-1);
+				$element->{phone} = $phone;
 			}
 			elsif ($ie eq $IE{'IPADDR'}){
-				# TODO
-				$buffer = '';
+				my $ipaddr = substr($buffer, 0, $len);
+				$buffer = substr($buffer, $len-1);
+				$element->{ipaddr} = $ipaddr;
 			}
 
 			push @{$response}, $element;
