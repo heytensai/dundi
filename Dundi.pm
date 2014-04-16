@@ -308,8 +308,7 @@ sub parse_ie
 			}
 			# KEYCRC32
 			elsif ($ie eq $IE{'KEYCRC32'}){
-				# TODO
-				$element->{keycrc32} = '';
+				$element->{keycrc32} = $details;
 			}
 			# HINT
 			elsif ($ie eq $IE{'HINT'}){
