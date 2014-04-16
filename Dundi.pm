@@ -217,7 +217,7 @@ sub parse_ie
 
 			# IE specific details
 			if ($ie eq $IE{'EID'}){
-				$element->{id} = unpack('H6', $details);
+				$element->{id} = unpack('H12', $details);
 			}
 			# CALLEDCONTEXT
 			elsif ($ie eq $IE{'CALLEDCONTEXT'}){
