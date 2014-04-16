@@ -287,8 +287,14 @@ sub parse_ie
 			}
 			# ENCDATA
 			elsif ($ie eq $IE{'ENCDATA'}){
-				# TODO
-				$element->{encdata} = '';
+				# per RFC, the remainder of the buffer is encdata
+				# but... Asterisk seems to do it differently
+				if ($len eq 0){
+					$element->{encdata} = $buffer;
+				}
+				else{
+					$element->{encdata} = $details;
+				}
 			}
 			# SHAREDKEY
 			elsif ($ie eq $IE{'SHAREDKEY'}){
