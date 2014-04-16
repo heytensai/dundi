@@ -34,6 +34,17 @@ C<Dundi> is cool
 
 =cut
 
+my %CAUSE_NAME = (
+	0x00 => 'Success',
+	0x01 => 'General',
+	0x02 => 'Reserved',
+	0x03 => 'NoAuth',
+	0x04 => 'Duplicate',
+	0x05 => 'TTLExpired',
+	0x06 => 'NeedKey',
+	0x07 => 'BadEncrypt',
+);
+
 my %PROTOCOL = (
 	'NONE' => 0x00,
 	'IAX' => 0x01,
@@ -267,6 +278,7 @@ sub parse_ie
 			# CAUSE
 			elsif ($ie eq $IE{'CAUSE'}){
 				$element->{code} = unpack('C', $details);
+				$element->{name} = $element->{code} ? $CAUSE_NAME{$element->{code}} : '';
 				$element->{description} = substr($details, 1);
 			}
 			# REQEID
