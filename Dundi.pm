@@ -334,7 +334,9 @@ sub parse_ie
 			push @{$response}, $element;
 		}
 		else{
-			#print "unknown IE ($ie)\n";
+			# invalid (future protocol?) element type
+			# ignore anything else in the stream
+			$buffer = '';
 		}
 	}
 
