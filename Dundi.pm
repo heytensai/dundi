@@ -334,8 +334,7 @@ sub parse_ie
 			push @{$response}, $element;
 		}
 		else{
-			print "unknown IE ($ie)\n";
-			$buffer = '';
+			#print "unknown IE ($ie)\n";
 		}
 	}
 
