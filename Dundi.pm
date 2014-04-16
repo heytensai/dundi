@@ -193,7 +193,10 @@ sub parse_ie
 	my $count = 10;
 	while ($buffer && $count--){
 		($ie, $len, $buffer) = unpack('CCH*', $buffer);
-		$buffer = pack('H*', $buffer);
+		my $details = substr($buffer, 0, $len * 2);
+		$details = pack('H*', $details);
+		$buffer = substr($buffer, $len * 2);
+		$buffer = $buffer ? pack('H*', $buffer) : undef;
 
 		# if it's a valid element type
 		if (defined $IE_NAME{$ie}){
@@ -203,32 +206,27 @@ sub parse_ie
 
 			# IE specific details
 			if ($ie eq $IE{'EID'}){
-				my ($id, $buffer) = unpack('H6H*', $buffer);
-				$buffer = pack('H*', $buffer);
-				$element->{id} = $id;
+				$element->{id} = unpack('H6', $details);
 			}
+			# CALLEDCONTEXT
 			elsif ($ie eq $IE{'CALLEDCONTEXT'}){
-				my $context = substr($buffer, 0, $len);
-				$buffer = substr($buffer, $len-1);
-				$element->{context} = $context;
+				$element->{context} = $details;
 			}
+			# CALLEDNUMBER
 			elsif ($ie eq $IE{'CALLEDNUMBER'}){
-				my $number = substr($buffer, 0, $len);
-				$buffer = substr($buffer, $len-1);
-				$element->{number} = $number;
+				$element->{number} = $details;
 			}
+			# EIDDIRECT
 			elsif ($ie eq $IE{'EIDDIRECT'}){
-				my ($id, $buffer) = unpack('H6H*', $buffer);
-				$buffer = pack('H*', $buffer);
-				$element->{id} = $id;
+				$element->{id} = unpack('H12', $details);
 			}
+			# ANSWER
 			elsif ($ie eq $IE{'ANSWER'}){
 				# destination-specific data is 11 bytes past the beginning
 				my $datalen = $len - 11;
 				$datalen = 0 if ($datalen < 0);
 
-				my ($eid, $protocol, $bits, $weight, $data, $buffer) = unpack('H6CC2C2H'.$datalen.'H*', $buffer);
-				$buffer = pack('H*', $buffer);
+				my ($eid, $protocol, $bits, $weight, $data) = unpack('H6CC2C2H'.$datalen, $details);
 				$element->{eid} = $eid;
 				if (defined $PROTOCOL_NAME{$protocol}){
 					$element->{protocol} = $PROTOCOL_NAME{$protocol};
@@ -250,105 +248,93 @@ sub parse_ie
 				$element->{nounsolicited} = 1 if ($bits & (1 << 7));
 				$element->{nocommercial} = 1 if ($bits & (1 << 8));
 			}
+			# TTL
 			elsif ($ie eq $IE{'TTL'}){
-				my ($ttl, $buffer) = unpack('C2H*', $buffer);
-				$buffer = pack('H*', $buffer);
-				$element->{ttl} = $ttl;
+				$element->{ttl} = hex(unpack('H*', $details));
 			}
+			# VERSION
 			elsif ($ie eq $IE{'VERSION'}){
-				my ($version, $buffer) = unpack('C2H*', $buffer);
-				$buffer = pack('H*', $buffer);
-				$element->{version} = $version;
+				$element->{version} = hex(unpack('H*', $details));
 			}
+			# EXPIRATION
 			elsif ($ie eq $IE{'EXPIRATION'}){
-				my ($expiration, $buffer) = unpack('C2H*', $buffer);
-				$buffer = pack('H*', $buffer);
-				$element->{expiration} = $expiration;
+				$element->{expiration} = hex(unpack('H*', $details));
 			}
+			# UNKNOWN
 			elsif ($ie eq $IE{'UNKNOWN'}){
-				my ($unknown, $buffer) = unpack('C2H*', $buffer);
-				$buffer = pack('H*', $buffer);
-				$element->{unknown} = $unknown;
+				$element->{unknown} = hex(unpack('H*', $details));
 			}
+			# CAUSE
 			elsif ($ie eq $IE{'CAUSE'}){
-				# TODO H* is not the correct unpack code
-				my ($code, $desc) = unpack('CH*', $buffer);
-				$desc = pack('H*', $desc);
-				$element->{code} = $code;
-				$element->{description} = $desc;
+				$element->{code} = unpack('C', $details);
+				$element->{description} = substr($details, 1);
 			}
+			# REQEID
 			elsif ($ie eq $IE{'REQEID'}){
-				my ($id, $buffer) = unpack('H6H*', $buffer);
-				$buffer = pack('H*', $buffer);
-				$element->{id} = $id;
+				$element->{id} = unpack('H12', $details);
 			}
+			# ENCDATA
 			elsif ($ie eq $IE{'ENCDATA'}){
 				# TODO
-				$buffer = '';
+				$element->{encdata} = '';
 			}
+			# SHAREDKEY
 			elsif ($ie eq $IE{'SHAREDKEY'}){
-				my $key = unpack('H*', $buffer);
-				$buffer = '';
+				my $key = unpack('H*', $details);
 				$element->{key} = $key;
 			}
+			# SIGNATURE
 			elsif ($ie eq $IE{'SIGNATURE'}){
-				my $sig = unpack('H*', $buffer);
-				$buffer = '';
+				my $sig = unpack('H*', $details);
 				$element->{signature} = $sig;
 			}
+			# KEYCRC32
 			elsif ($ie eq $IE{'KEYCRC32'}){
 				# TODO
-				$buffer = '';
+				$element->{keycrc32} = '';
 			}
+			# HINT
 			elsif ($ie eq $IE{'HINT'}){
 				# TODO
-				$buffer = '';
+				$element->{hint} = '';
 			}
+			# DEPARTMENT
 			elsif ($ie eq $IE{'DEPARTMENT'}){
-				my $department = substr($buffer, 0, $len);
-				$buffer = substr($buffer, $len-1);
-				$element->{department} = $department;
+				$element->{department} = $details;
 			}
+			# ORGANIZATION
 			elsif ($ie eq $IE{'ORGANIZATION'}){
-				my $organization = substr($buffer, 0, $len);
-				$buffer = substr($buffer, $len-1);
-				$element->{organization} = $organization;
+				$element->{organization} = $details;
 			}
+			# LOCALITY
 			elsif ($ie eq $IE{'LOCALITY'}){
-				my $locality = substr($buffer, 0, $len);
-				$buffer = substr($buffer, $len-1);
-				$element->{locality} = $locality;
+				$element->{locality} = $details;
 			}
+			# STATEPROV
 			elsif ($ie eq $IE{'STATEPROV'}){
-				my $stateprov = substr($buffer, 0, $len);
-				$buffer = substr($buffer, $len-1);
-				$element->{stateprov} = $stateprov;
+				$element->{stateprov} = $details;
 			}
+			# COUNTRY
 			elsif ($ie eq $IE{'COUNTRY'}){
-				my $country = substr($buffer, 0, $len);
-				$buffer = substr($buffer, $len-1);
-				$element->{country} = $country;
+				$element->{country} = $details;
 			}
+			# EMAIL
 			elsif ($ie eq $IE{'EMAIL'}){
-				my $email = substr($buffer, 0, $len);
-				$buffer = substr($buffer, $len-1);
-				$element->{email} = $email;
+				$element->{email} = $details;
 			}
+			# PHONE
 			elsif ($ie eq $IE{'PHONE'}){
-				my $phone = substr($buffer, 0, $len);
-				$buffer = substr($buffer, $len-1);
-				$element->{phone} = $phone;
+				$element->{phone} = $details;
 			}
+			# IPADDR
 			elsif ($ie eq $IE{'IPADDR'}){
-				my $ipaddr = substr($buffer, 0, $len);
-				$buffer = substr($buffer, $len-1);
-				$element->{ipaddr} = $ipaddr;
+				$element->{ipaddr} = $details;
 			}
 
 			push @{$response}, $element;
 		}
 		else{
-			print "unknown IE\n";
+			print "unknown IE ($ie)\n";
 			$buffer = '';
 		}
 	}
