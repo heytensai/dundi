@@ -312,8 +312,11 @@ sub parse_ie
 			}
 			# HINT
 			elsif ($ie eq $IE{'HINT'}){
-				# TODO
-				$element->{hint} = '';
+				my ($ignore, $bits) = unpack('CC', $details);
+				$element->{ttlexpired} = 1 if ($bits & (1 << 0));
+				$element->{dontask} = 1 if ($bits & (1 << 1));
+				$element->{unaffected} = 1 if ($bits & (1 << 2));
+				$element->{hint} = substr($details, 2);
 			}
 			# DEPARTMENT
 			elsif ($ie eq $IE{'DEPARTMENT'}){
