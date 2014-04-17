@@ -182,7 +182,7 @@ sub parse
 		# convert IE back
 		$ie = $ie ? pack('H*', $ie) : '';
 
-		$packet->{ie} = $self->parse_ie($cmd, $ie, $ie);
+		$packet->{ie} = $self->parse_ie($ie);
 	}
 	else{
 		# invalid packet
@@ -194,7 +194,6 @@ sub parse
 sub parse_ie
 {
 	my $self = shift;
-	my $cmd = shift;
 	my $buffer = shift;
 	my $response = [];
 
