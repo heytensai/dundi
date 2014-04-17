@@ -28,5 +28,5 @@ my $stream = '140a00077470747074707470';
 
 $stream = pack('H*', $stream);
 
-my $ie = $dundi->parse_ie('', $stream);
+my $ie = $dundi->parse_ie($stream);
 print Dumper($ie);
