@@ -163,7 +163,7 @@ sub parse
 	#my $hex = unpack('H*', $buffer);
 	#print "hex=$hex\n";
 
-	my ($src_tnx, $dst_tnx, $iseq, $oseq, $fld, $flags, $ie) = unpack('nnCCCCH*', $buffer);
+	my ($src_tnx, $dst_tnx, $iseq, $oseq, $fld, $flags) = unpack('nnCCCC', $buffer);
 	my $f = ($fld & 0x80) >> 7;
 	my $r = ($fld & 0x40) >> 7;
 	my $cmd = ($fld & 0x3f);
@@ -179,8 +179,11 @@ sub parse
 		$packet->{r} = $r;
 		$packet->{flags} = $flags;
 
-		# convert IE back
-		$ie = $ie ? pack('H*', $ie) : '';
+		# find information elements, if they exist
+		my $ie;
+		if (length($buffer) > 12){
+			$ie = substr($buffer, 8);
+		}
 
 		$packet->{ie} = $self->parse_ie($ie);
 	}
