@@ -17,6 +17,7 @@ our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(
 	new
 	parse
+	encode
 );
 our $VERSION = '0.1';
 
@@ -362,6 +363,167 @@ sub parse_ie
 	}
 
 	return $response;
+}
+
+sub encode
+{
+	my $self = shift;
+	my $packet = shift;
+	my $buffer = '';
+
+	if (!defined $packet->{src}
+		|| !defined $packet->{dst}
+		|| !defined $packet->{iseq}
+		|| !defined $packet->{oseq}
+		|| !defined $packet->{r}
+		|| !defined $packet->{f}
+		|| !defined $packet->{flags}
+		|| !defined $packet->{cmd}
+		){
+		return 1;
+	}
+
+	my $cmd = $CMD{$packet->{cmd}};
+	if (!defined $cmd){
+		return 2;
+	}
+
+	my $fld = ($packet->{f} ? 0x80 : 0);
+	$fld |= ($packet->{r} ? 0x40 : 0);
+	$fld |= ($cmd & 0x3f);
+
+	$buffer = pack('SSCCCC', $packet->{src}, $packet->{dst}, $packet->{iseq}, $packet->{oseq}, $fld, $packet->{flags});
+
+	if (defined $packet->{ie}){
+		$buffer .= $self->encode_ie($packet->{ie});
+	}
+
+	return $buffer;
+}
+
+sub encode_ie
+{
+	my $self = shift;
+	my $ie_array = shift;
+	my $buffer = '';
+
+	if (ref $ie_array ne 'ARRAY' || $#{$ie_array} eq -1){
+		return '';
+	}
+
+	foreach my $ie (@{$ie_array}){
+		if ($IE{$ie->{type}}){
+			$buffer .= pack('C', $IE{$ie->{type}});
+
+			# EID
+			if ($ie->{type} eq 'EID'){
+				# TODO
+			}
+			# CALLEDCONTEXT
+			elsif ($ie->{type} eq 'CALLEDCONTEXT'){
+				# TODO
+			}
+			# CALLEDNUMBER
+			elsif ($ie->{type} eq 'CALLEDNUMBER'){
+				# TODO
+			}
+			# EIDDIRECT
+			elsif ($ie->{type} eq 'EIDDIRECT'){
+				# TODO
+			}
+			# ANSWER
+			elsif ($ie->{type} eq 'ANSWER'){
+				# TODO
+			}
+			# TTL
+			elsif ($ie->{type} eq 'TTL'){
+				# TODO
+			}
+			# VERSION
+			elsif ($ie->{type} eq 'VERSION'){
+				# TODO
+			}
+			# EXPIRATION
+			elsif ($ie->{type} eq 'EXPIRATION'){
+				# TODO
+			}
+			# UNKNOWN
+			elsif ($ie->{type} eq 'UNKNOWN'){
+				# TODO
+			}
+			# CAUSE
+			elsif ($ie->{type} eq 'CAUSE'){
+				# TODO
+			}
+			# REQEID
+			elsif ($ie->{type} eq 'REQEID'){
+				# TODO
+			}
+			# ENCDATA
+			elsif ($ie->{type} eq 'ENCDATA'){
+				# TODO
+			}
+			# SHAREDKEY
+			elsif ($ie->{type} eq 'SHAREDKEY'){
+				# TODO
+			}
+			# SIGNATURE
+			elsif ($ie->{type} eq 'SIGNATURE'){
+				# TODO
+			}
+			# KEYCRC32
+			elsif ($ie->{type} eq 'KEYCRC32'){
+				$buffer .= pack('C', length($ie->{keycrc32}));
+				$buffer .= $ie->{keycrc32};
+			}
+			# HINT
+			elsif ($ie->{type} eq 'HINT'){
+				# TODO
+			}
+			# DEPARTMENT
+			elsif ($ie->{type} eq 'DEPARTMENT'){
+				$buffer .= pack('C', length($ie->{department}));
+				$buffer .= $ie->{department};
+			}
+			# ORGANIZATION
+			elsif ($ie->{type} eq 'ORGANIZATION'){
+				$buffer .= pack('C', length($ie->{organization}));
+				$buffer .= $ie->{organization};
+			}
+			# LOCALITY
+			elsif ($ie->{type} eq 'LOCALITY'){
+				$buffer .= pack('C', length($ie->{locality}));
+				$buffer .= $ie->{locality};
+			}
+			# STATEPROV
+			elsif ($ie->{type} eq 'STATEPROV'){
+				$buffer .= pack('C', length($ie->{stateprov}));
+				$buffer .= $ie->{stateprov};
+			}
+			# COUNTRY
+			elsif ($ie->{type} eq 'COUNTRY'){
+				$buffer .= pack('C', length($ie->{country}));
+				$buffer .= $ie->{country};
+			}
+			# EMAIL
+			elsif ($ie->{type} eq 'EMAIL'){
+				$buffer .= pack('C', length($ie->{email}));
+				$buffer .= $ie->{email};
+			}
+			# PHONE
+			elsif ($ie->{type} eq 'PHONE'){
+				$buffer .= pack('C', length($ie->{phone}));
+				$buffer .= $ie->{phone};
+			}
+			# IPADDR
+			elsif ($ie->{type} eq 'IPADDR'){
+				$buffer .= pack('C', length($ie->{ipaddr}));
+				$buffer .= $ie->{ipaddr};
+			}
+		}
+	}
+
+	return $buffer;
 }
 
 1;
