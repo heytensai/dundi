@@ -203,8 +203,7 @@ sub parse_ie
 	return $response if (!$buffer);
 
 	my ($ie, $len);
-	my $count = 10;
-	while ($buffer && $count--){
+	while ($buffer){
 		($ie, $len, $buffer) = unpack('CCH*', $buffer);
 		my $details = substr($buffer, 0, $len * 2);
 		$details = pack('H*', $details);
