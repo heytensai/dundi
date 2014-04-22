@@ -535,11 +535,22 @@ sub encode_ie
 				$buffer .= $ie->{keycrc32};
 			}
 			# HINT
+			# expect $ie->{hint} as a string
+			# optionally expect $ie->{ttlexpired}
+			# optionally expect $ie->{dontask}
+			# optionally expect $ie->{unaffected}
 			elsif ($ie->{type} eq 'HINT'){
 				# validation
 				next if (!$ie->{hint});
 
-				# TODO
+				my $bits = 0;
+				$bits |= (1 << 0) if ($element->{ttlexpired});
+				$bits |= (1 << 1) if ($element->{dontask});
+				$bits |= (1 << 2) if ($element->{unaffected});
+
+				$buffer .= pack('C', length($element->{hint}) + 2);
+				$buffer .= pack('CC', 0, $bits);
+				$buffer .= $element->{hint};
 			}
 			# DEPARTMENT
 			elsif ($ie->{type} eq 'DEPARTMENT'){
