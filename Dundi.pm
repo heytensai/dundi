@@ -544,13 +544,13 @@ sub encode_ie
 				next if (!$ie->{hint});
 
 				my $bits = 0;
-				$bits |= (1 << 0) if ($element->{ttlexpired});
-				$bits |= (1 << 1) if ($element->{dontask});
-				$bits |= (1 << 2) if ($element->{unaffected});
+				$bits |= (1 << 0) if ($ie->{ttlexpired});
+				$bits |= (1 << 1) if ($ie->{dontask});
+				$bits |= (1 << 2) if ($ie->{unaffected});
 
-				$buffer .= pack('C', length($element->{hint}) + 2);
+				$buffer .= pack('C', length($ie->{hint}) + 2);
 				$buffer .= pack('CC', 0, $bits);
-				$buffer .= $element->{hint};
+				$buffer .= $ie->{hint};
 			}
 			# DEPARTMENT
 			elsif ($ie->{type} eq 'DEPARTMENT'){
