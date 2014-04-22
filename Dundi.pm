@@ -416,8 +416,12 @@ sub encode_ie
 			$buffer .= pack('C', $IE{$ie->{type}});
 
 			# EID
+			# expect a 12-digit hex string for $ie->{id}
 			if ($ie->{type} eq 'EID'){
-				# TODO
+				# first the length
+				$buffer .= pack('C', 6);
+				# now the ID
+				$buffer .= pack('H12', $ie->{id});
 			}
 			# CALLEDCONTEXT
 			elsif ($ie->{type} eq 'CALLEDCONTEXT'){
@@ -428,8 +432,12 @@ sub encode_ie
 				# TODO
 			}
 			# EIDDIRECT
+			# expect a 12-digit hex string for $ie->{id}
 			elsif ($ie->{type} eq 'EIDDIRECT'){
-				# TODO
+				# first the length
+				$buffer .= pack('C', 6);
+				# now the ID
+				$buffer .= pack('H12', $ie->{id});
 			}
 			# ANSWER
 			elsif ($ie->{type} eq 'ANSWER'){
