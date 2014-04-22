@@ -405,7 +405,7 @@ sub encode_ie
 {
 	my $self = shift;
 	my $ie_array = shift;
-	my $buffer = '';
+	my $encoded = '';
 
 	if (ref $ie_array ne 'ARRAY' || $#{$ie_array} eq -1){
 		return '';
@@ -413,11 +413,14 @@ sub encode_ie
 
 	foreach my $ie (@{$ie_array}){
 		if ($IE{$ie->{type}}){
-			$buffer .= pack('C', $IE{$ie->{type}});
+			my $buffer = pack('C', $IE{$ie->{type}});
 
 			# EID
 			# expect a 12-digit hex string for $ie->{id}
 			if ($ie->{type} eq 'EID'){
+				# validation
+				next if (!$ie->{id});
+
 				# first the length
 				$buffer .= pack('C', 6);
 				# now the ID
@@ -425,15 +428,24 @@ sub encode_ie
 			}
 			# CALLEDCONTEXT
 			elsif ($ie->{type} eq 'CALLEDCONTEXT'){
+				# validation
+				next if (!$ie->{context});
+
 				# TODO
 			}
 			# CALLEDNUMBER
 			elsif ($ie->{type} eq 'CALLEDNUMBER'){
+				# validation
+				next if (!$ie->{number});
+
 				# TODO
 			}
 			# EIDDIRECT
 			# expect a 12-digit hex string for $ie->{id}
 			elsif ($ie->{type} eq 'EIDDIRECT'){
+				# validation
+				next if (!$ie->{id});
+
 				# first the length
 				$buffer .= pack('C', 6);
 				# now the ID
@@ -441,97 +453,164 @@ sub encode_ie
 			}
 			# ANSWER
 			elsif ($ie->{type} eq 'ANSWER'){
+				# validation
+				next if (!$ie->{eid});
+				next if (!$ie->{protocol});
+				next if (!$ie->{weight});
+				next if (!$ie->{destination});
+
 				# TODO
 			}
 			# TTL
 			elsif ($ie->{type} eq 'TTL'){
+				# validation
+				next if (!$ie->{ttl});
+
 				# TODO
 			}
 			# VERSION
 			elsif ($ie->{type} eq 'VERSION'){
+				# validation
+				next if (!$ie->{version});
+
 				# TODO
 			}
 			# EXPIRATION
 			elsif ($ie->{type} eq 'EXPIRATION'){
+				# validation
+				next if (!$ie->{expiration});
+
 				# TODO
 			}
 			# UNKNOWN
 			elsif ($ie->{type} eq 'UNKNOWN'){
+				# validation
+				next if (!$ie->{unknown});
+
 				# TODO
 			}
 			# CAUSE
 			elsif ($ie->{type} eq 'CAUSE'){
+				# validation
+				next if (!$ie->{code});
+				next if (!$ie->{name});
+				next if (!$ie->{description});
+
 				# TODO
 			}
 			# REQEID
 			elsif ($ie->{type} eq 'REQEID'){
+				# validation
+				next if (!$ie->{id});
+
 				# TODO
 			}
 			# ENCDATA
 			elsif ($ie->{type} eq 'ENCDATA'){
+				# validation
+				next if (!$ie->{encdata});
+
 				# TODO
 			}
 			# SHAREDKEY
 			elsif ($ie->{type} eq 'SHAREDKEY'){
+				# validation
+				next if (!$ie->{key});
+
 				# TODO
 			}
 			# SIGNATURE
 			elsif ($ie->{type} eq 'SIGNATURE'){
+				# validation
+				next if (!$ie->{signature});
+
 				# TODO
 			}
 			# KEYCRC32
 			elsif ($ie->{type} eq 'KEYCRC32'){
+				# validation
+				next if (!$ie->{keycrc32});
+
 				$buffer .= pack('C', length($ie->{keycrc32}));
 				$buffer .= $ie->{keycrc32};
 			}
 			# HINT
 			elsif ($ie->{type} eq 'HINT'){
+				# validation
+				next if (!$ie->{hint});
+
 				# TODO
 			}
 			# DEPARTMENT
 			elsif ($ie->{type} eq 'DEPARTMENT'){
+				# validation
+				next if (!$ie->{department});
+
 				$buffer .= pack('C', length($ie->{department}));
 				$buffer .= $ie->{department};
 			}
 			# ORGANIZATION
 			elsif ($ie->{type} eq 'ORGANIZATION'){
+				# validation
+				next if (!$ie->{organization});
+
 				$buffer .= pack('C', length($ie->{organization}));
 				$buffer .= $ie->{organization};
 			}
 			# LOCALITY
 			elsif ($ie->{type} eq 'LOCALITY'){
+				# validation
+				next if (!$ie->{locality});
+
 				$buffer .= pack('C', length($ie->{locality}));
 				$buffer .= $ie->{locality};
 			}
 			# STATEPROV
 			elsif ($ie->{type} eq 'STATEPROV'){
+				# validation
+				next if (!$ie->{stateprov});
+
 				$buffer .= pack('C', length($ie->{stateprov}));
 				$buffer .= $ie->{stateprov};
 			}
 			# COUNTRY
 			elsif ($ie->{type} eq 'COUNTRY'){
+				# validation
+				next if (!$ie->{country});
+
 				$buffer .= pack('C', length($ie->{country}));
 				$buffer .= $ie->{country};
 			}
 			# EMAIL
 			elsif ($ie->{type} eq 'EMAIL'){
+				# validation
+				next if (!$ie->{phone});
+
 				$buffer .= pack('C', length($ie->{email}));
 				$buffer .= $ie->{email};
 			}
 			# PHONE
 			elsif ($ie->{type} eq 'PHONE'){
+				# validation
+				next if (!$ie->{phone});
+
 				$buffer .= pack('C', length($ie->{phone}));
 				$buffer .= $ie->{phone};
 			}
 			# IPADDR
 			elsif ($ie->{type} eq 'IPADDR'){
+				# validation
+				next if (!$ie->{ipaddr});
+
 				$buffer .= pack('C', length($ie->{ipaddr}));
 				$buffer .= $ie->{ipaddr};
 			}
+
+			$encoded .= $buffer;
 		}
 	}
 
-	return $buffer;
+	return $encoded;
 }
 
 1;
