@@ -8,7 +8,7 @@ use Dundi;
 
 my $dundi = Dundi->new();
 
-# should encode to 'aaaabbbb00000010140a00077470747074707470'
+# what we expect this to encode to, for confirmation
 my $encoded = 'aaaabbbb00000010130a7a727470747074707470';
 my $packet = {
 	'ie' => [
