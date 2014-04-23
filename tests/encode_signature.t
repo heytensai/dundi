@@ -1,9 +1,10 @@
 #!/usr/bin/perl
-$encoded = 'aaaabbbb00000010';
+$encoded = 'aaaabbbb00000010120412131415';
 $packet = {
 	'ie' => [
 		{
-			'type' => '',
+			'type' => 'SIGNATURE',
+			'signature' => "\x12\x13\x14\x15",
 		},
 	],
 	'cmd' => 'ACK',

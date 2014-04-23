@@ -524,7 +524,12 @@ sub encode_ie
 				# validation
 				next if (!$ie->{signature});
 
-				# TODO
+				# max allowed is 0x80 (actually, it's the minimum too)
+				my $len = length($ie->{signature});
+				next if ($len > 0x80);
+
+				$buffer .= pack('C', $len);
+				$buffer .= $ie->{signature};
 			}
 			# KEYCRC32
 			elsif ($ie->{type} eq 'KEYCRC32'){
