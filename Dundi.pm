@@ -517,7 +517,12 @@ sub encode_ie
 				# validation
 				next if (!$ie->{key});
 
-				# TODO
+				# max allowed is 0x80 (actually, it's the minimum too)
+				my $len = length($ie->{key});
+				next if ($len > 0x80);
+
+				$buffer .= pack('C', $len);
+				$buffer .= $ie->{key};
 			}
 			# SIGNATURE
 			elsif ($ie->{type} eq 'SIGNATURE'){
