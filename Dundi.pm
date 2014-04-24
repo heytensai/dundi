@@ -504,8 +504,14 @@ sub encode_ie
 			elsif ($ie->{type} eq 'UNKNOWN'){
 				# validation
 				next if (!$ie->{unknown});
+				# unknown command is numeric 16 bit int
+				next if (!Data::Types::is_int($ie->{unknown}));
+				next if ($ie->{unknown} > 0xffff);
+				next if ($ie->{unknown} < 0);
 
-				# TODO
+				# length is always 2
+				$buffer .= pack('C', 1);
+				$buffer .= pack('C', $ie->{unknown});
 			}
 			# CAUSE
 			elsif ($ie->{type} eq 'CAUSE'){
