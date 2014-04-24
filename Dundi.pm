@@ -299,6 +299,13 @@ sub parse_ie
 				else{
 					$element->{encdata} = $details;
 				}
+
+				# split into IV and encdata
+				my $strlen = length($element->{encdata});
+				if ($strlen > 16){
+					$element->{iv} = substr($element->{encdata}, 0, 16);
+					$element->{encdata} = substr($element->{encdata}, 16);
+				}
 			}
 			# SHAREDKEY
 			elsif ($ie eq $IE{'SHAREDKEY'}){
