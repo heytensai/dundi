@@ -460,9 +460,37 @@ sub encode_ie
 				next if (!$ie->{eid});
 				next if (!$ie->{protocol});
 				next if (!$ie->{weight});
+				next if (!Data::Types::is_int($ie->{weight}));
 				next if (!$ie->{destination});
 
-				# TODO
+				my $protocol = 0;
+				if ($PROTOCOL{$ie->{protocol}}){
+					$protocol = $PROTOCOL{$ie->{protocol}};
+				}
+				else{
+					next;
+				}
+
+				$buffer .= pack('C', length($ie->{destination}) + 11);
+				$buffer .= pack('H12', $ie->{eid});
+				$buffer .= pack('C', $protocol);
+
+				my $bits = $ie->{nocommercial} ? 1 : 0;
+				$buffer .= pack('C', $bits);
+
+				$bits = 0;
+				$bits |= $ie->{exists} ? (1 << 0) : 0;
+				$bits |= $ie->{matchmore} ? (1 << 1) : 0;
+				$bits |= $ie->{canmatch} ? (1 << 2) : 0;
+				$bits |= $ie->{ignorepat} ? (1 << 3) : 0;
+				$bits |= $ie->{residential} ? (1 << 4) : 0;
+				$bits |= $ie->{commercial} ? (1 << 5) : 0;
+				$bits |= $ie->{mobile} ? (1 << 6) : 0;
+				$bits |= $ie->{nounsolicited} ? (1 << 7) : 0;
+				$buffer .= pack('C', $bits);
+
+				$buffer .= pack('n', $ie->{weight});
+				$buffer .= $ie->{destination};
 			}
 			# TTL
 			elsif ($ie->{type} eq 'TTL'){
