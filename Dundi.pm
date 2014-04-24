@@ -567,9 +567,20 @@ sub encode_ie
 			# ENCDATA
 			elsif ($ie->{type} eq 'ENCDATA'){
 				# validation
+				next if (!$ie->{iv});
 				next if (!$ie->{encdata});
 
-				# TODO
+				# Asterisk seems to put the length in, even though the spec says
+				# not to. So we will too, being careful not to overrun the field
+				# in which case we'll just put in 0.
+				my $len = length($ie->{iv}) + length($ie->{encdata});
+				if ($len > 0xff){
+					$len = 0;
+					# TODO ensure this is the last element
+				}
+				$buffer .= pack('C', $len);
+				$buffer .= $ie->{iv};
+				$buffer .= $ie->{encdata};
 			}
 			# SHAREDKEY
 			elsif ($ie->{type} eq 'SHAREDKEY'){
