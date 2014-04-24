@@ -431,14 +431,16 @@ sub encode_ie
 				# validation
 				next if (!$ie->{context});
 
-				# TODO
+				$buffer .= pack('C', length($ie->{context}));
+				$buffer .= $ie->{context};
 			}
 			# CALLEDNUMBER
 			elsif ($ie->{type} eq 'CALLEDNUMBER'){
 				# validation
 				next if (!$ie->{number});
 
-				# TODO
+				$buffer .= pack('C', length($ie->{number}));
+				$buffer .= $ie->{number};
 			}
 			# EIDDIRECT
 			# expect a 12-digit hex string for $ie->{id}
