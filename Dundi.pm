@@ -491,8 +491,14 @@ sub encode_ie
 			elsif ($ie->{type} eq 'EXPIRATION'){
 				# validation
 				next if (!$ie->{expiration});
+				# expiration is numeric 16 bit int
+				next if (!Data::Types::is_int($ie->{expiration}));
+				next if ($ie->{expiration} > 0xffff);
+				next if ($ie->{expiration} < 0);
 
-				# TODO
+				# length is always 2
+				$buffer .= pack('C', 2);
+				$buffer .= pack('n', $ie->{expiration});
 			}
 			# UNKNOWN
 			elsif ($ie->{type} eq 'UNKNOWN'){
