@@ -1,9 +1,11 @@
 #!/usr/bin/perl
-$encoded = 'aaaabbbb00000010';
+$encoded = 'aaaabbbb000000100e1f025768617463686f6f2074616c6b696e272027626f75742057696c6c69733f';
 $packet = {
 	'ie' => [
 		{
-			'type' => '',
+			'type' => 'CAUSE',
+			'code' => 2,
+			'description', "Whatchoo talkin' 'bout Willis?",
 		},
 	],
 	'cmd' => 'ACK',

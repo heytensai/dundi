@@ -546,10 +546,14 @@ sub encode_ie
 			elsif ($ie->{type} eq 'CAUSE'){
 				# validation
 				next if (!$ie->{code});
-				next if (!$ie->{name});
+				next if (!Data::Types::is_int($ie->{code}));
+				next if (!defined $CAUSE_NAME{$ie->{code}});
 				next if (!$ie->{description});
 
 				# TODO
+				$buffer .= pack('C', length($ie->{description}) + 1);
+				$buffer .= pack('C', $ie->{code});
+				$buffer .= $ie->{description};
 			}
 			# REQEID
 			elsif ($ie->{type} eq 'REQEID'){
