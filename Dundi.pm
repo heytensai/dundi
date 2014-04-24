@@ -11,6 +11,7 @@ use warnings;
 use threads;
 
 require Carp;
+use Data::Types;
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -467,8 +468,14 @@ sub encode_ie
 			elsif ($ie->{type} eq 'TTL'){
 				# validation
 				next if (!$ie->{ttl});
+				# TTL is numeric 16 bit int
+				next if (!Data::Types::is_int($ie->{ttl}));
+				next if ($ie->{ttl} > 0xff);
+				next if ($ie->{ttl} < 0);
 
-				# TODO
+				# length is always 2
+				$buffer .= pack('C', 2);
+				$buffer .= pack('n', $ie->{ttl});
 			}
 			# VERSION
 			elsif ($ie->{type} eq 'VERSION'){

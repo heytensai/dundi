@@ -1,9 +1,10 @@
 #!/usr/bin/perl
-$encoded = 'aaaabbbb00000010';
+$encoded = 'aaaabbbb0000001006020020';
 $packet = {
 	'ie' => [
 		{
-			'type' => '',
+			'type' => 'TTL',
+			'ttl' => 32,
 		},
 	],
 	'cmd' => 'ACK',
