@@ -1,9 +1,10 @@
 #!/usr/bin/perl
-$encoded = 'aaaabbbb00000010';
+$encoded = 'aaaabbbb000000100f06aabbcc112233';
 $packet = {
 	'ie' => [
 		{
-			'type' => '',
+			'type' => 'REQEID',
+			'id' => 'aabbcc112233',
 		},
 	],
 	'cmd' => 'ACK',

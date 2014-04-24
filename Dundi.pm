@@ -527,7 +527,10 @@ sub encode_ie
 				# validation
 				next if (!$ie->{id});
 
-				# TODO
+				# first the length
+				$buffer .= pack('C', 6);
+				# now the ID
+				$buffer .= pack('H12', $ie->{id});
 			}
 			# ENCDATA
 			elsif ($ie->{type} eq 'ENCDATA'){
