@@ -481,8 +481,11 @@ sub encode_ie
 			elsif ($ie->{type} eq 'VERSION'){
 				# validation
 				next if (!$ie->{version});
+				# we only support version 1
+				next if ($ie->{version} != 1);
 
-				# TODO
+				$buffer .= pack('C', 2);
+				$buffer .= pack('n', $ie->{version});
 			}
 			# EXPIRATION
 			elsif ($ie->{type} eq 'EXPIRATION'){
