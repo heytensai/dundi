@@ -50,6 +50,7 @@ my %CAUSE_NAME = (
 my %PROTOCOL = (
 	'NONE' => 0x00,
 	'IAX' => 0x01,
+	'IAX2' => 0x01,
 	'SIP' => 0x02,
 	'H.323' => 0x03,
 );
