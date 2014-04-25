@@ -401,7 +401,7 @@ sub encode
 	$fld |= ($packet->{r} ? 0x40 : 0);
 	$fld |= ($cmd & 0x3f);
 
-	$buffer = pack('SSCCCC', $packet->{src}, $packet->{dst}, $packet->{iseq}, $packet->{oseq}, $fld, $packet->{flags});
+	$buffer = pack('nnCCCC', $packet->{src}, $packet->{dst}, $packet->{iseq}, $packet->{oseq}, $fld, $packet->{flags});
 
 	if (defined $packet->{ie}){
 		$buffer .= $self->encode_ie($packet->{ie});
