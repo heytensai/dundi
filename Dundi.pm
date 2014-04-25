@@ -167,8 +167,8 @@ sub parse
 	#print "hex=$hex\n";
 
 	my ($src_tnx, $dst_tnx, $iseq, $oseq, $fld, $flags) = unpack('nnCCCC', $buffer);
-	my $f = ($fld & 0x80) >> 7;
-	my $r = ($fld & 0x40) >> 7;
+	my $f = ($fld & 0x80) ? 1 : 0;
+	my $r = ($fld & 0x40) ? 1 : 0;
 	my $cmd = ($fld & 0x3f);
 
 	# if it's a command we recognize
