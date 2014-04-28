@@ -13,7 +13,7 @@ use IO::Socket::INET;
 use Data::Dumper;
 use Dundi;
 
-my $sock = IO::Socket::INET->new(LocalPort => 4521, Proto => 'udp', ReuseAddr => 1);
+my $sock = IO::Socket::INET->new(LocalPort => 4520, Proto => 'udp', ReuseAddr => 1);
 
 my $dundi = Dundi->new();
 
