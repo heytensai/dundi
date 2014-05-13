@@ -18,8 +18,13 @@ use Config::IniFiles;
 use Dundi;
 
 # CONFIG VARS
-my $port = 4520;
+my $default_port = 4520;
+my $cfg_file = shift || 'dundi.ini';
 # END CONFIG VARS
+
+my $cfg = Config::IniFiles->new(-file => $cfg_file);
+my $port = $cfg->val('general', 'port') || $default_port;
+my $eid = $cfg->val('general', 'eid');
 
 my $sock = IO::Socket::INET->new(LocalPort => $port, Proto => 'udp', ReuseAddr => 1);
 
@@ -43,6 +48,19 @@ sub command_loop
 		elsif ($cmd =~ /^ping ([\d\.]+)/){
 			print "ping $1\n";
 			#send_ping();
+		}
+		elsif ($cmd =~ /^context show (.*)$/){
+			if ($cfg->SectionExists($1)){
+				my @keys = $cfg->Parameters($1);
+				map { print "$_=" . $cfg->val($1, $_) . "\n"; } @keys;
+			}
+			else{
+				print "no context\n";
+			}
+		}
+		elsif ($cmd =~ /^reload$/){
+			$cfg = Config::IniFiles->new(-file => $cfg_file);
+			print "config reloaded\n";
 		}
 		print "dundi> ";
 	}
@@ -94,6 +112,17 @@ sub send_dpresponse
 	my $req = shift;
 	my $tnx = shift;
 
+	my $context;
+	my $number;
+	foreach my $ie (@{$req->{id}}){
+		if ($ie->{type} eq 'CALLEDNUMBER'){
+			$number = $ie->{number};
+		}
+		elsif ($ie->{type} eq 'CALLEDCONTEXT'){
+			$context = $ie->{number};
+		}
+	}
+
 	my $response = {
 		cmd => 'DPRESPONSE',
 		dst => $req->{src},
@@ -104,6 +133,14 @@ sub send_dpresponse
 		oseq => 0,
 		iseq => 1,
 	};
+
+	if ($context && $number){
+		 if ($cfg->exists($context, $number)){
+			 my $route = $cfg->val($context, $number);
+			 # TODO assemble IEs for the response
+		 }
+	}
+
 	my $pkt = $dundi->encode($response);
 	$sock->send($pkt);
 }
