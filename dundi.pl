@@ -9,6 +9,7 @@
 use strict;
 use warnings;
 use threads;
+use threads::shared;
 use feature "switch";
 
 use IO::Socket::INET;
@@ -30,6 +31,7 @@ my $sock = IO::Socket::INET->new(LocalPort => $port, Proto => 'udp', ReuseAddr =
 
 my $dundi = Dundi->new();
 
+my %stats :shared = ();
 my $listen_thread = threads->create(\&listener);
 
 sleep(1);
@@ -48,6 +50,12 @@ sub command_loop
 		elsif ($cmd =~ /^ping ([\d\.]+)/){
 			print "ping $1\n";
 			#send_ping();
+		}
+		elsif ($cmd =~ /^stats$/){
+			{
+				lock(%stats);
+				print Data::Dumper::Dumper(\%stats);
+			}
 		}
 		elsif ($cmd =~ /^context show (.*)$/){
 			if ($cfg->SectionExists($1)){
@@ -73,6 +81,10 @@ sub listener
 	while (1){
 		my $buffer;
 		$sock->recv($buffer, 1024);
+		{
+			lock(%stats);
+			$stats{total} += 1;
+		}
 		my $peer_address = $sock->peerhost();
 		my $peer_port = $sock->peerport();
 
@@ -89,8 +101,16 @@ sub listener
 
 		if ($packet->{cmd} eq 'NULL'){
 			send_ack($packet, 1);
+			{
+				lock(%stats);
+				$stats{pings} += 1;
+			}
 		}
 		elsif ($packet->{cmd} eq 'DPDISCOVER'){
+			{
+				lock(%stats);
+				$stats{lookups} += 1;
+			}
 			print Dumper($packet);
 			my $tnx = generate_transaction();
 			send_ack($packet, 0, $tnx);
@@ -114,14 +134,16 @@ sub send_dpresponse
 
 	my $context;
 	my $number;
-	foreach my $ie (@{$req->{id}}){
+	foreach my $ie (@{$req->{ie}}){
 		if ($ie->{type} eq 'CALLEDNUMBER'){
 			$number = $ie->{number};
 		}
 		elsif ($ie->{type} eq 'CALLEDCONTEXT'){
-			$context = $ie->{number};
+			$context = $ie->{context};
 		}
 	}
+	print "context=$context\n";
+	print "number=$number\n";
 
 	my $response = {
 		cmd => 'DPRESPONSE',
@@ -138,10 +160,15 @@ sub send_dpresponse
 		 if ($cfg->exists($context, $number)){
 			 my $route = $cfg->val($context, $number);
 			 # TODO assemble IEs for the response
+			 print "found a route to $route\n";
 		 }
 	}
 
 	my $pkt = $dundi->encode($response);
+	{
+		lock(%stats);
+		$stats{responses} += 1;
+	}
 	$sock->send($pkt);
 }
 
@@ -162,6 +189,10 @@ sub send_ack
 		iseq => $req->{oseq} + 1,
 	};
 	my $pkt = $dundi->encode($response);
+	{
+		lock(%stats);
+		$stats{responses} += 1;
+	}
 	$sock->send($pkt);
 }
 
@@ -179,6 +210,10 @@ sub send_ping
 		iseq => 0,
 	};
 	my $pkt = $dundi->encode($req);
+	{
+		lock(%stats);
+		$stats{responses} += 1;
+	}
 	$sock->send($pkt);
 }
 
